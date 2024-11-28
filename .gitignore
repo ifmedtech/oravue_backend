@@ -1,0 +1,54 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.out
+
+# Ignore all YAML files in the config folder
+config/*.yml
+!config/local.yml
+
+# Build directories
+_build/
+bin/
+vendor/
+
+# Logs
+*.log
+
+# Dependency directories (when not using vendoring)
+Godeps/
+#vendor/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+
+# Go specific files
+*.test
+*.prof
+*.sum
+*.mod
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+storage/
+
+# Test coverage
+*.coverprofile
+*.cov
+
+# Temporary and backup files
+*.tmp
+*.bak
+*.old
+*.orig
+
+# Build artifacts
+/build/
+
+
