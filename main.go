@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
 	"log/slog"
 	"net/http"
+	"oravue_backend/db"
 	"oravue_backend/internal/config"
+	"oravue_backend/internal/http/handlers/user"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,25 +19,30 @@ import (
 func main() {
 	// load config
 	cfg := config.MustLoad()
+
 	//database setup
+	_, errDb := db.New(cfg)
+	if errDb != nil {
+		log.Fatalf("unable to connect database %s", errDb)
+	}
+	slog.Info("storage initialized database")
 
 	//setup router
-	router := http.NewServeMux()
-	router.HandleFunc("GET /", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Write([]byte("welcome to OraVue"))
-	})
-	//setup server
+	router := mux.NewRouter()
+	api := router.PathPrefix("/api/v1").Subrouter()
+	user.Routes(api)
 
+	//setup server
 	server := http.Server{
 		Addr:    cfg.Addr,
 		Handler: router,
 	}
-
 	fmt.Printf("server started %s", cfg.Addr)
 
+	//grace-full shutdown
 	done := make(chan os.Signal, 1)
-
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {

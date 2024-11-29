@@ -9,7 +9,7 @@ database:
   user: "postgres"
   password: "postgres"
   name: "oravue"
-  sslmode: "disable"
+  ssl_mode: "disable"
 
 jwt:
   secret: "your-secret-key"

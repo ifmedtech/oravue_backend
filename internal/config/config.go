@@ -9,10 +9,18 @@ import (
 type HTTPServer struct {
 	Addr string `yaml:"address" env:"address" env-required:"true"`
 }
+type Database struct {
+	Host     string `yaml:"host" env:"host" env-required:"true"`
+	Port     string `yaml:"port" env:"port" env-required:"true"`
+	User     string `yaml:"user" env:"user" env-required:"true"`
+	Password string `yaml:"password" env:"password" env-required:"true"`
+	Name     string `yaml:"name" env:"name" env-required:"true"`
+	SSLMode  string `yaml:"ssl_mode" env:"ssl_mode" env-required:"true"`
+}
 type Config struct {
-	Env         string `yaml:"env" env:"ENV" env-required:"true"`
-	StoragePath string `yaml:"storage_path" env-required:"true"`
-	HTTPServer  `yaml:"http_server"`
+	Env        string `yaml:"env" env:"ENV" env-required:"true"`
+	HTTPServer `yaml:"http_server"`
+	Database   `yaml:"database"`
 }
 
 func MustLoad() *Config {
