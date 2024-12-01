@@ -32,7 +32,7 @@ func main() {
 	api := router.PathPrefix("/api/v1").Subrouter()
 
 	userRepo := &user.UserRepoStruct{Db: database}
-	user.Routes(api, userRepo)
+	user.Routes(api, userRepo, cfg)
 
 	//setup server
 	server := http.Server{

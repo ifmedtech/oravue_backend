@@ -12,5 +12,5 @@ database:
   ssl_mode: "disable"
 
 jwt:
-  secret: "your-secret-key"
+  secret: "ifmt-developer"
   expiration: 3600

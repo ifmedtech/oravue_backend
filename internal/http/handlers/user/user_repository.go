@@ -1,6 +1,8 @@
 package user
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"oravue_backend/db"
 	"time"
@@ -8,6 +10,7 @@ import (
 
 type UserRepository interface {
 	GetOtpRepository(phoneNumber string, otp string, expiry time.Time) (string, error)
+	VerifyOtpRepository(phoneNumber string, otp string) (string, error)
 }
 
 type UserRepoStruct struct {
@@ -30,4 +33,25 @@ func (u *UserRepoStruct) GetOtpRepository(phoneNumber string, otp string, expiry
 		return " ", fmt.Errorf("failed to create user: %w", err)
 	}
 	return otp, nil
+}
+
+func (u *UserRepoStruct) VerifyOtpRepository(phoneNumber string, otp string) (string, error) {
+	query := `
+		SELECT id
+		FROM users
+		WHERE phone_number = $1 
+		  AND otp = $2 
+-- 		  AND expiry >= CURRENT_TIMESTAMP 
+		  `
+
+	var userID string
+	err := u.Db.Db.QueryRow(query, phoneNumber, otp).Scan(&userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", fmt.Errorf("otp is in valid: %w", err) // OTP is invalid or expired
+		}
+		return "", fmt.Errorf("failed to query OTP: %w", err)
+	}
+
+	return userID, nil
 }

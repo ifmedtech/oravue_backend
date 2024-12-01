@@ -2,15 +2,15 @@ package user
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"log/slog"
 	"math/rand"
 	"net/http"
-	usermodel "oravue_backend/internal/http/model"
+	"oravue_backend/internal/config"
 	"oravue_backend/internal/utils/response"
+	"oravue_backend/pkg/jwt"
 	"time"
 )
 
@@ -24,7 +24,7 @@ func GetOtp(repository UserRepository) http.HandlerFunc {
 
 		// Generate OTP and expiry time
 		otp := generateOTP(6)
-		expiry := time.Now().Add(5 * time.Minute)
+		expiry := time.Now().Add(10 * time.Minute)
 
 		// Store OTP in the repository
 		_, err := repository.GetOtpRepository(phoneNumber, otp, expiry)
@@ -59,26 +59,56 @@ func GetOtp(repository UserRepository) http.HandlerFunc {
 	}
 }
 
-func VerifyUser() http.HandlerFunc {
+func VerifyOtp(repository UserRepository, config *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		slog.Info("Creating User")
-		var userModel usermodel.UserModel
-		err := json.NewDecoder(r.Body).Decode(&userModel)
+		// Parse request body
+		var request struct {
+			PhoneNumber string `json:"phone_number" validate:"required,len=10,numeric"`
+			OTP         string `json:"otp" validate:"required,len=6,numeric"`
+		}
 
-		if err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			slog.Error("Failed to decode request", slog.String("error", err.Error()))
 			response.WriteJson(w, http.StatusBadRequest, response.GeneralError(err))
 			return
 		}
 
-		//validate request
-		if err := validator.New().Struct(userModel); err != nil {
-			var validateErrs validator.ValidationErrors
-			errors.As(err, &validateErrs)
-			response.WriteJson(w, http.StatusBadRequest, response.ValidationError(validateErrs))
+		// Validate request fields
+		if err := validator.New().Struct(request); err != nil {
+			response.WriteJson(w, http.StatusBadRequest, response.ValidationError(err.(validator.ValidationErrors)))
 			return
 		}
 
-		w.Write([]byte("User created"))
+		// Verify OTP
+		userID, err := repository.VerifyOtpRepository(request.PhoneNumber, request.OTP)
+		if err != nil {
+			slog.Error("Failed to verify OTP", slog.String("error", err.Error()))
+			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(err))
+			return
+		}
+
+		if userID == "" {
+			response.WriteJson(w, http.StatusUnauthorized, map[string]interface{}{
+				"status":  "error",
+				"message": "Invalid or expired OTP",
+			})
+			return
+		}
+
+		// Generate JWT token
+		token, err := jwt.GenerateJWT(userID, config)
+		if err != nil {
+			slog.Error("Failed to generate JWT", slog.String("error", err.Error()))
+			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(err))
+			return
+		}
+
+		// Send success response with token
+		response.WriteJson(w, http.StatusOK, map[string]interface{}{
+			"status":  "success",
+			"message": "OTP verified successfully",
+			"token":   token,
+		})
 	}
 }
 

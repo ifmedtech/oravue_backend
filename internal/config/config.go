@@ -17,10 +17,15 @@ type Database struct {
 	Name     string `yaml:"name" env:"name" env-required:"true"`
 	SSLMode  string `yaml:"ssl_mode" env:"ssl_mode" env-required:"true"`
 }
+
+type Jwt struct {
+	Secret string `yaml:"secret" env:"secret" env-required:"true"`
+}
 type Config struct {
 	Env        string `yaml:"env" env:"ENV" env-required:"true"`
 	HTTPServer `yaml:"http_server"`
 	Database   `yaml:"database"`
+	Jwt        `yaml:"jwt"`
 }
 
 func MustLoad() *Config {
