@@ -30,7 +30,7 @@ func New(cfg *config.Config) (*Postgresql, error) {
 	createTableQuery := `
 		CREATE TABLE IF NOT EXISTS users (
 			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-			phone_number TEXT NOT NULL,
+			phone_number TEXT NOT NULL UNIQUE,
 			otp TEXT NOT NULL,
 			expiry TIMESTAMP NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

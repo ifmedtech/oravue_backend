@@ -21,7 +21,7 @@ func main() {
 	cfg := config.MustLoad()
 
 	//database setup
-	_, errDb := db.New(cfg)
+	database, errDb := db.New(cfg)
 	if errDb != nil {
 		log.Fatalf("unable to connect database %s", errDb)
 	}
@@ -30,7 +30,9 @@ func main() {
 	//setup router
 	router := mux.NewRouter()
 	api := router.PathPrefix("/api/v1").Subrouter()
-	user.Routes(api)
+
+	userRepo := &user.UserRepoStruct{Db: database}
+	user.Routes(api, userRepo)
 
 	//setup server
 	server := http.Server{
