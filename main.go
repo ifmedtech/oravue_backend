@@ -68,3 +68,13 @@ func main() {
 
 	slog.Info("server stopped")
 }
+
+////TODO : user below middleware to verify route
+//// Protected route
+//protected := router.PathPrefix("/protected").Subrouter()
+//protected.Use(middleware.AuthMiddleware(cfg))
+//protected.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+//	// Access user_id from the context
+//	userID := r.Context().Value(middleware.UserIDKey).(string)
+//	w.Write([]byte(fmt.Sprintf("Hello, user %s", userID)))
+//}).Methods("GET")
