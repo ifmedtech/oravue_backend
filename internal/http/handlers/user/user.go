@@ -80,7 +80,10 @@ func VerifyOtp(repository UserRepository, config *config.Config) http.HandlerFun
 		}
 
 		// Verify OTP
-		userID, err := repository.VerifyOtpRepository(request.PhoneNumber, request.OTP)
+		if config.Env == "Dev" {
+
+		}
+		userID, err := repository.VerifyOtpRepository(request.PhoneNumber, request.OTP, config)
 		if err != nil {
 			slog.Error("Failed to verify OTP", slog.String("error", err.Error()))
 			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(err))

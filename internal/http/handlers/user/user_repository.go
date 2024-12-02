@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"oravue_backend/db"
+	"oravue_backend/internal/config"
 	"time"
 )
 
 type UserRepository interface {
 	GetOtpRepository(phoneNumber string, otp string, expiry time.Time) (string, error)
-	VerifyOtpRepository(phoneNumber string, otp string) (string, error)
+	VerifyOtpRepository(phoneNumber string, otp string, config *config.Config) (string, error)
 }
 
 type UserRepoStruct struct {
@@ -35,17 +36,28 @@ func (u *UserRepoStruct) GetOtpRepository(phoneNumber string, otp string, expiry
 	return otp, nil
 }
 
-func (u *UserRepoStruct) VerifyOtpRepository(phoneNumber string, otp string) (string, error) {
-	query := `
+func (u *UserRepoStruct) VerifyOtpRepository(phoneNumber string, otp string, config *config.Config) (string, error) {
+
+	var userID string
+	var err error
+
+	if config.Env == "development" {
+		query := `
+		SELECT id
+		FROM users
+		WHERE phone_number = $1 
+		  `
+		err = u.Db.Db.QueryRow(query, phoneNumber).Scan(&userID)
+	} else {
+		query := `
 		SELECT id
 		FROM users
 		WHERE phone_number = $1 
 		  AND otp = $2 
 -- 		  AND expiry >= CURRENT_TIMESTAMP 
 		  `
-
-	var userID string
-	err := u.Db.Db.QueryRow(query, phoneNumber, otp).Scan(&userID)
+		err = u.Db.Db.QueryRow(query, phoneNumber, otp).Scan(&userID)
+	}
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", fmt.Errorf("otp is in valid: %w", err) // OTP is invalid or expired
