@@ -7,9 +7,7 @@
 *.out
 
 # Ignore all YAML files in the config folder
-config/*.yml
-!config/local.yml
-
+config/production.yaml
 # Build directories
 _build/
 bin/
