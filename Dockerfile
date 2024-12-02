@@ -22,4 +22,7 @@ COPY --from=builder /app/config ./config
 
 USER nonroot:nonroot
 
+# Set the default configuration path
+ENV CONFIG_PATH=config/production.yaml
+
 ENTRYPOINT ["./main"]

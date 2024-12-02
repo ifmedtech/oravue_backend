@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
@@ -30,8 +31,16 @@ type Config struct {
 
 func MustLoad() *Config {
 	var configPath string
-	configPath = "config/production.yaml"
 
+	configPath = os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		flags := flag.String("config", "", "path to the config file")
+		flag.Parse()
+		configPath = *flags
+		if configPath == "" {
+			log.Fatal("config file path is required")
+		}
+	}
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		log.Fatalf("config file not found %s", configPath)
 	}
