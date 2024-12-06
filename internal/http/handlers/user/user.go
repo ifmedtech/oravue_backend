@@ -1,6 +1,7 @@
 package user
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/go-playground/validator/v10"
@@ -14,7 +15,7 @@ import (
 	"time"
 )
 
-func GetOtp(repository UserRepository) http.HandlerFunc {
+func GetOtp(repository UserRepository, config *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Info("sending OTP")
 
@@ -39,14 +40,13 @@ func GetOtp(repository UserRepository) http.HandlerFunc {
 		}
 
 		// Optionally, send OTP using an external service
-		/*
-			err = sendOtpToExternalService(phoneNumber, otp)
-			if err != nil {
-				slog.Error("Failed to send OTP via external service", slog.String("phone_number", phoneNumber), slog.String("error", err.Error()))
-				response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to send OTP")))
-				return
-			}
-		*/
+
+		err = sendOtpTOExternalService(phoneNumber, otp, config)
+		if err != nil {
+			slog.Error("Failed to send OTP via external service", slog.String("phone_number", phoneNumber), slog.String("error", err.Error()))
+			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to send OTP")))
+			return
+		}
 
 		// Write success response
 		err = response.WriteJson(w, http.StatusAccepted, map[string]interface{}{
@@ -124,4 +124,58 @@ func generateOTP(length int) string {
 		otp += string(digits[rand.Intn(len(digits))])
 	}
 	return otp
+}
+
+func sendOtpTOExternalService(phoneNumber string, otp string, config *config.Config) error {
+	apiURL := "https://control.msg91.com/api/v5/flow"
+
+	type Recipient struct {
+		Mobiles string `json:"mobiles"`
+		Name    string `json:"name"`
+		Otp     string `json:"otp"`
+	}
+	type OtpRequestPayload struct {
+		TemplateID string      `json:"template_id"`
+		Recipients []Recipient `json:"recipients"`
+	}
+	payload := OtpRequestPayload{
+		TemplateID: config.MSG91.TemplateId,
+		Recipients: []Recipient{
+			{
+				Mobiles: phoneNumber,
+				Name:    "Saurabh",
+				Otp:     otp,
+			},
+		},
+	}
+
+	// Convert the payload to JSON
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	// Set headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("authkey", config.MSG91.AuthKey)
+
+	// Create an HTTP client with timeout
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	// Send the request
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check the response status
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("received non-OK HTTP status: %s", resp.Status)
+	}
+	return nil
 }

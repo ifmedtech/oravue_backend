@@ -14,3 +14,7 @@ database:
 jwt:
   secret: "ifmt-developer"
   expiration: 3600
+
+msG91:
+  auth_key: ""
+  template_id: ""

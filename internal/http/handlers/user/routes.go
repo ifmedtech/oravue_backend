@@ -7,7 +7,7 @@ import (
 
 func Routes(api *mux.Router, userRepository UserRepository, config *config.Config) {
 	router := api.PathPrefix("/user").Subrouter()
-	router.Handle("/otp/{phone_number}", GetOtp(userRepository)).Methods("GET")
+	router.Handle("/otp/{phone_number}", GetOtp(userRepository, config)).Methods("GET")
 	router.Handle("/verify", VerifyOtp(userRepository, config)).Methods("POST")
 
 }

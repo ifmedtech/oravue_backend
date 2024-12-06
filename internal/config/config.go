@@ -22,11 +22,16 @@ type Database struct {
 type Jwt struct {
 	Secret string `yaml:"secret" env:"secret" env-required:"true"`
 }
+type MSG91 struct {
+	AuthKey    string `yaml:"auth_key" env:"auth_key" env-required:"true"`
+	TemplateId string `yaml:"template_id" env:"template_id" env-required:"true"`
+}
 type Config struct {
 	Env        string `yaml:"env" env:"ENV" env-required:"true"`
 	HTTPServer `yaml:"http_server"`
 	Database   `yaml:"database"`
 	Jwt        `yaml:"jwt"`
+	MSG91      `yaml:"msG91"`
 }
 
 func MustLoad() *Config {
