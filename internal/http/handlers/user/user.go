@@ -51,7 +51,6 @@ func GetOtp(repository UserRepository, config *config.Config) http.HandlerFunc {
 		// Write success response
 		err = response.WriteJson(w, http.StatusAccepted, map[string]interface{}{
 			"status":  "success",
-			"otp":     otp, //TODO : remove this before going live
 			"message": fmt.Sprintf("OTP sent successfully to %s", phoneNumber),
 		})
 		if err != nil {
