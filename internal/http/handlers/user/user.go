@@ -41,11 +41,13 @@ func GetOtp(repository UserRepository, config *config.Config) http.HandlerFunc {
 
 		// Optionally, send OTP using an external service
 
-		err = sendOtpTOExternalService(phoneNumber, otp, config)
-		if err != nil {
-			slog.Error("Failed to send OTP via external service", slog.String("phone_number", phoneNumber), slog.String("error", err.Error()))
-			response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to send OTP")))
-			return
+		if config.Env == "production" {
+			err = sendOtpTOExternalService(phoneNumber, otp, config)
+			if err != nil {
+				slog.Error("Failed to send OTP via external service", slog.String("phone_number", phoneNumber), slog.String("error", err.Error()))
+				response.WriteJson(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to send OTP")))
+				return
+			}
 		}
 
 		// Write success response
@@ -126,6 +128,7 @@ func generateOTP(length int) string {
 }
 
 func sendOtpTOExternalService(phoneNumber string, otp string, config *config.Config) error {
+
 	apiURL := "https://control.msg91.com/api/v5/flow"
 
 	type Recipient struct {
