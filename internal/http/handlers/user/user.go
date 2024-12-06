@@ -135,6 +135,7 @@ func sendOtpTOExternalService(phoneNumber string, otp string, config *config.Con
 		Mobiles string `json:"mobiles"`
 		Name    string `json:"name"`
 		Otp     string `json:"otp"`
+		AppName string `json:"app_name"`
 	}
 	type OtpRequestPayload struct {
 		TemplateID string      `json:"template_id"`
@@ -147,6 +148,7 @@ func sendOtpTOExternalService(phoneNumber string, otp string, config *config.Con
 				Mobiles: phoneNumber,
 				Name:    "Saurabh",
 				Otp:     otp,
+				AppName: "OraVue App",
 			},
 		},
 	}
