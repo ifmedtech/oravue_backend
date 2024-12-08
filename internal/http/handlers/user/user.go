@@ -41,7 +41,7 @@ func GetOtp(repository UserRepository, config *config.Config) http.HandlerFunc {
 
 		// Optionally, send OTP using an external service
 
-		if config.Env == "production" {
+		if config.Env == "prod" {
 			err = sendOtpTOExternalService(phoneNumber, otp, config)
 			if err != nil {
 				slog.Error("Failed to send OTP via external service", slog.String("phone_number", phoneNumber), slog.String("error", err.Error()))
@@ -145,7 +145,7 @@ func sendOtpTOExternalService(phoneNumber string, otp string, config *config.Con
 		TemplateID: config.MSG91.TemplateId,
 		Recipients: []Recipient{
 			{
-				Mobiles: phoneNumber,
+				Mobiles: "91" + phoneNumber,
 				Name:    "Saurabh",
 				Otp:     otp,
 				AppName: "OraVue App",
