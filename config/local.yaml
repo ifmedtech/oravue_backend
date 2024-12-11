@@ -1,4 +1,4 @@
-env: development
+env: dev
 
 http_server:
   address: "0.0.0.0:8000"
@@ -16,5 +16,5 @@ jwt:
   expiration: 3600
 
 msG91:
-  auth_key: ""
-  template_id: ""
+  auth_key: "1234"
+  template_id: "1234"
