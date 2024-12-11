@@ -41,7 +41,7 @@ func (u *UserRepoStruct) VerifyOtpRepository(phoneNumber string, otp string, con
 	var userID string
 	var err error
 
-	if config.Env == "development" {
+	if config.Env == "dev" {
 		query := `
 		SELECT id
 		FROM users
