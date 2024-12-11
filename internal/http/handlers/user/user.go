@@ -130,7 +130,6 @@ func sendOtpTOExternalService(phoneNumber string, otp string, config *config.Con
 
 	type Recipient struct {
 		Mobiles string `json:"mobiles"`
-		Name    string `json:"name"`
 		Otp     string `json:"otp"`
 		AppName string `json:"app_name"`
 	}
@@ -143,9 +142,8 @@ func sendOtpTOExternalService(phoneNumber string, otp string, config *config.Con
 		Recipients: []Recipient{
 			{
 				Mobiles: "91" + phoneNumber,
-				Name:    "Saurabh",
 				Otp:     otp,
-				AppName: "OraVue App",
+				AppName: "OraVue",
 			},
 		},
 	}
