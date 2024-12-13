@@ -2,7 +2,7 @@
 
 docker build -t oravue .
 
-docker run -e CONFIG_PATH=config/production.yaml oravue
+docker run -e CONFIG_PATH=config/produ.yaml oravue
 
 docker build -t oravue .
 
